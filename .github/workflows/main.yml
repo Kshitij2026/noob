@@ -10,13 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout NoobFree source
         uses: actions/checkout@v4
 
-      - name: Extract NoobFree-Source.zip
+      - name: Locate Android Project Directory
+        id: locate
         run: |
-          unzip -o NoobFree-Source.zip -d extracted_src
-          ls -la extracted_src/NoobFree
+          ls -la
+          SETTINGS_FILE=$(find . -maxdepth 3 -name "settings.gradle.kts" | head -n 1)
+          if [ -z "$SETTINGS_FILE" ]; then
+            echo "ERROR: settings.gradle.kts not found anywhere in repository! Please upload the extracted NoobFree source files to the repository."
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$SETTINGS_FILE")
+          echo "project_dir=$PROJECT_DIR" >> $GITHUB_OUTPUT
+          echo "Found Android project at: $PROJECT_DIR"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -30,15 +38,15 @@ jobs:
           gradle-version: '8.9'
 
       - name: Run Unit Tests
-        working-directory: extracted_src/NoobFree
+        working-directory: ${{ steps.locate.outputs.project_dir }}
         run: gradle testDebugUnitTest --stacktrace
 
       - name: Build Installable Debug APK
-        working-directory: extracted_src/NoobFree
+        working-directory: ${{ steps.locate.outputs.project_dir }}
         run: gradle assembleDebug --stacktrace
 
       - name: Prepare APK Artifact
-        working-directory: extracted_src/NoobFree
+        working-directory: ${{ steps.locate.outputs.project_dir }}
         run: cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/NoobFree-debug.apk"
 
       - name: Downloadable NoobFree Debug APK
