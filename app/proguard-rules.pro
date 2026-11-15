@@ -1,0 +1,5 @@
+-keep class com.noobfree.android.IShizukuShellService { *; }
+-keep class com.noobfree.android.IShizukuShellService$* { *; }
+-keep class com.noobfree.android.service.ShizukuUserService { *; }
+-keep class rikka.shizuku.** { *; }
+-dontwarn rikka.shizuku.**

@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.NoobFree" parent="android:Theme.Material.NoActionBar" />
+</resources>
